@@ -279,5 +279,5 @@ select authorlabel
 from book_avg_rating natural join book_author
 where avg_rating >= 4
 GROUP by authorlabel
-having count(DISTINCT isbn13) > 1
+having count(DISTINCT isbn13) > 1;
 
