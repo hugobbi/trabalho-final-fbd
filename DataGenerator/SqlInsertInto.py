@@ -17,6 +17,8 @@ class SqlInsertInto:
             for j, value in enumerate(value_list):
                 if isinstance(value, str):
                     value_list[j] = "'" + value.replace("'", "") + "'"
+                else:
+                    value_list[j] = str(value)
 
             values[i] = value_list
 
