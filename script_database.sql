@@ -281,3 +281,26 @@ where avg_rating >= 4
 GROUP by authorlabel
 having count(DISTINCT isbn13) > 1;
 
+-- PROCEDIMENTOS ARMAZENADOS -- 
+
+-- Verifica se o usuário que quer inserir uma avaliação para um livro já leu esse livro
+CREATE OR REPLACE FUNCTION check_leu_livro() RETURNS TRIGGER AS $$
+BEGIN
+    IF (select bookstatus from bookshelfbook where usercode = NEW.usercode and isbn13 = NEW.isbn13) <> 'Read' THEN
+        RAISE EXCEPTION 'O usuário tem que ter lido o livro para poder avaliá-lo';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Verifica se usuário já leu o livro para inserir um rating nele
+CREATE TRIGGER rating_livro_lido
+BEFORE INSERT ON rating
+FOR EACH ROW
+EXECUTE FUNCTION check_leu_livro();
+
+-- Verifica se usuário já leu o livro para inserir um review nele
+CREATE TRIGGER review_livro_lido
+BEFORE INSERT ON review
+FOR EACH ROW
+EXECUTE FUNCTION check_leu_livro();
