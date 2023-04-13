@@ -12,7 +12,18 @@ class SqlInsertInto:
         return f'INSERT INTO {self.table_name} ({columns}) VALUES \n{values};'
 
     def transform_values_into_tuples(self, values):
-        return [f"({', '.join(value)})" for value in values]
+
+        for i, value_list in enumerate(values):
+            for j, value in enumerate(value_list):
+                if isinstance(value, str):
+                    value_list[j] = "'" + value.replace("'", "") + "'"
+                else:
+                    value_list[j] = str(value)
+
+            values[i] = value_list
+
+        tuple = [f"({', '.join(value)})" for value in values]
+        return tuple
 
     def add_values(self, values):
         self.values.append(values)

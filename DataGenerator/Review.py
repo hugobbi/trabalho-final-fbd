@@ -1,6 +1,6 @@
 import random
-from FakeData import book_reviews
-from generators import generate_guid
+from DataGenerator.FakeData import book_reviews
+from DataGenerator.generators import generate_guid
 
 class Review:
     def __init__(self, book_guid):
