@@ -162,9 +162,122 @@ INSERT INTO WrittenBy (WrittenByCode, ISBN13, AuthorCode) VALUES
 INSERT INTO BookshelfBook (BookshelfBookCode, BookStatus, UserCode, ISBN13) VALUES 
 ('ddc9d795-b950-40e5-989c-4771ed21fa71', 'Reading', '8877961c-e1a6-43b5-bef2-9ead81a71303', 872205851),
 ('c408869c-b074-4f7f-9632-26638fc48b42', 'To Read', '8877961c-e1a6-43b5-bef2-9ead81a71303', 1400052920),
-('3caa9e65-c79f-4055-af9f-c4320befcc70', 'Read', '1992904f-6a40-4fcc-9e18-3c85e2598654', 872205851);
+('3caa9e65-c79f-4055-af9f-c4320befcc70', 'Read', '1992904f-6a40-4fcc-9e18-3c85e2598654', 872205851),
+('3caa9e65-c79f-4055-af9f-c4350befdd70', 'Read', '1992904f-6a40-4fcc-9e18-3c85e2598654', 1400052920),
+('3cbb6e65-c79f-4155-af9f-c4350befdd70', 'Read', '1992904f-6a40-4fcc-9e18-3c85e2598654', 8466318771);
 
 INSERT INTO Follows (FlwCode, UserACode, UserBCode) VALUES 
 ('e76e05bb-0e6e-40cd-8e3f-50547c5ae410' ,'8877961c-e1a6-43b5-bef2-9ead81a71303', '0968bff8-1697-4604-939e-7fa2055cefdd'),
 ('17b40b51-0006-453a-920a-ec181b356bd7', '8877961c-e1a6-43b5-bef2-9ead81a71303', '1992904f-6a40-4fcc-9e18-3c85e2598654'),
 ('3f033c50-17b3-4efa-8984-e2f54af8fa5d', '0968bff8-1697-4604-939e-7fa2055cefdd', '1992904f-6a40-4fcc-9e18-3c85e2598654');
+
+-- Visão contendo um livro e seu autor
+create view book_author AS
+SELECT book.isbn13, author.authorlabel
+from book natural join writtenby natural join author;
+
+-- Visão contendo informações sobre o livro e a média de estrelas dele
+create view book_avg_rating AS
+select book.isbn13, book.title, book.ctrycode, book.langcode, book.pubcode, book.ratingcount, avg(rating.numberofstars) as avg_rating
+from book natural join rating
+GROUP by book.isbn13, book.title, book.ctrycode, book.langcode, book.pubcode, book.ratingcount;
+
+-- Visão contendo usuário e número de pessoas seguindo e que seguem ele
+create view user_follows as
+select usercode, seguindo, seguidores
+from (Select usercode, count(userbcode) as seguidores
+      from goodreadsuser left join follows on usercode = userbcode
+      group by usercode, userbcode) as seguidores_tab 
+      join 
+      (Select usercode, count(useracode) as seguindo
+      from goodreadsuser left join follows on usercode = useracode
+      group by usercode, useracode) as seguindo_tab 
+      using(usercode);
+      
+-- Consulta 1: nome dos livros com mais de 4 estrelas de média publicados no Brasil e a média das suas estrelas e seu autor
+select title, avg_rating, authorlabel
+from book_avg_rating natural join book_author NATURAL JOIN country 
+WHERE avg_rating >= 4 and ctrylabel = 'Brazil';
+
+-- Consulta 2: nomes dos livros com maior rating e seus autores
+SELECT title, authorlabel
+from book_avg_rating natural join book_author
+where avg_rating = (SELECT max(avg_rating) from book_avg_rating);
+
+-- Consulta 3: usernames dos usuários com mais de 5 ratings e reviews combinados
+SELECT username
+from goodreadsuser natural join rating natural join review
+group by username
+having count(rtgcode) + COUNT(rvwcode) > 5;
+
+-- Consulta 4: nomes autores com mais livros publicados
+select authorlabel
+from book_author
+group by authorlabel
+having count(DISTINCT isbn13) = (SELECT MAX(numero_de_livros) AS max_livros_por_autor
+                                FROM (SELECT COUNT(DISTINCT isbn13) AS numero_de_livros
+                                      FROM book_author
+                                      GROUP BY authorlabel) as livros_por_autor);
+
+
+
+                                
+-- Consulta 5: nome dos usuários que tem salvado pelo menos os mesmos livros que Mariana Silva e a soma entre
+-- a quantidade de pessoas seguidas por ela e que elas seguem
+select username, seguindo+seguidores as soma_conexões
+from goodreadsuser natural join user_follows as ext_user 
+WHERE username <> 'Mariana Silva' AND not EXISTS (select isbn13
+                                                 from bookshelfbook
+                                                 where usercode = (select DISTINCT usercode from goodreadsuser
+                                                                  where username = 'Mariana Silva')
+     															  AND isbn13 not in (SELECT DISTINCT isbn13
+                                                                                    from bookshelfbook
+                                                                                    where usercode = ext_user.usercode));
+
+-- Consulta 6: nomes dos gêneros literários com mais livros registrados
+select gendlabel
+from book natural join hasgender natural join gender
+GROUP by gendlabel
+having count(DISTINCT isbn13) = (SELECT max(numero_de_livros)
+                                from (select count(DISTINCT isbn13) as numero_de_livros
+                                     from book natural join hasgender natural join gender
+                                     group by gendlabel) as livros_por_genero);
+                                     
+-- Consulta 7: nomes dos usuários que escreveram mais reviews e o número de seguidores
+select username, seguidores
+from goodreadsuser natural join review natural join user_follows
+GROUP by usercode, seguidores
+having count(DISTINCT text) = (SELECT max(numero_de_reviews)
+                                from (select count(DISTINCT text) as numero_de_reviews
+                                     from goodreadsuser natural join review
+                                     group by usercode) as reviews_por_user);
+                                     
+-- Consulta 8: nomes dos usuários que leram mais livros e o número de pessoas que eles seguem
+select username, seguindo
+from goodreadsuser natural join bookshelfbook natural join user_follows
+where bookstatus = 'Read'
+GROUP by usercode, seguindo
+having count(DISTINCT isbn13) = (SELECT max(numero_de_livros_lidos)
+                                from (select count(DISTINCT isbn13) as numero_de_livros_lidos
+                                     from goodreadsuser natural join bookshelfbook
+                                     where bookstatus = 'Read'
+                                     GROUP by usercode) as livros_lidos_por_user);
+
+-- Consulta 9: dado o código do usuário, devolve seu gênero literário favorito
+select gendlabel
+from bookshelfbook natural join hasgender natural join gender
+where usercode = '1992904f-6a40-4fcc-9e18-3c85e2598654'
+group by gendlabel
+having count(gendlabel) = (SELECT max(numero_generos)
+                                from (select count(gendlabel) as numero_generos
+                                     from bookshelfbook natural join hasgender natural join gender
+                                     where usercode = '1992904f-6a40-4fcc-9e18-3c85e2598654'
+                                     GROUP by gendlabel) as generos_do_user);
+                                     
+-- Consulta 10: nome dos autores que possuem pelo menos dois livros com rating médio acima de 4
+select authorlabel
+from book_avg_rating natural join book_author
+where avg_rating >= 4
+GROUP by authorlabel
+having count(DISTINCT isbn13) > 1
+
