@@ -3,12 +3,12 @@ import random
 import os
 from DataGenerator import *
 
-from SqlInsertInto import SqlInsertInto
-from generators import generate_guid, generate_follower_guids
-from Genre import generate_genres
-from FakeData import genre_names
-from GoodReadsUser import generate_goodreads_users
-from BookStatus import generate_book_status
+from DataGenerator.SqlInsertInto import SqlInsertInto
+from DataGenerator.generators import generate_guid, generate_follower_guids
+from DataGenerator.Genre import generate_genres
+from DataGenerator.FakeData import genre_names
+from DataGenerator.GoodReadsUser import generate_goodreads_users
+from DataGenerator.BookStatus import generate_book_status
 
 NUMBER_OF_PEOPLE_TO_GENERATE = 10
 NUMBER_OF_BOOKS_TO_GET_FROM_DATASET = 10
@@ -55,7 +55,6 @@ def generate_sql_insertions():
         publisher_guid = generate_guid()
         country_guid = generate_guid()
         author_guid = generate_guid()
-        gender_guid = generate_guid()
         hasgender_guid = generate_guid()
         writtenby_guid = generate_guid()
 
@@ -68,7 +67,7 @@ def generate_sql_insertions():
         book_table.add_values([str(row['isbn13']), row['title'], str(random.randint(100, 500)), str(row['ratings_count']),
                                str(row['text_reviews_count']), row['publication_date'], country_guid, publisher_guid,
                                language_guid])
-        hasgender_table.add_values([hasgender_guid, str(row['isbn13']), gender_guid])
+        hasgender_table.add_values([hasgender_guid, str(row['isbn13']), random_gender.guid])
         writtenby_table.add_values([writtenby_guid, str(row['isbn13']), author_guid])
 
     ############################################

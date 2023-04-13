@@ -1,8 +1,8 @@
 import random
-from generators import generate_guid
-from FakeData import people_names
-from Review import generate_reviews
-from Rating import generate_ratings
+from DataGenerator.generators import generate_guid
+from DataGenerator.FakeData import people_names
+from DataGenerator.Review import generate_reviews
+from DataGenerator.Rating import generate_ratings
 
 # create a class that holds names
 class GoodReadsUser:

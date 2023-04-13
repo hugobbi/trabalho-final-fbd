@@ -1,5 +1,5 @@
 import random
-from generators import generate_guid
+from DataGenerator.generators import generate_guid
 
 class Rating:
     def __init__(self, book_guid):

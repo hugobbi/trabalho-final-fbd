@@ -1,4 +1,4 @@
-from generators import generate_guid
+from DataGenerator.generators import generate_guid
 
 # create a class that holds names
 class Genre:
