@@ -2,10 +2,11 @@ import pandas as pd
 import random
 import os
 
+from DataGenerator.Country import generate_countries
 from DataGenerator.SqlInsertInto import SqlInsertInto
 from DataGenerator.generators import generate_guid, generate_follower_guids
 from DataGenerator.Genre import generate_genres
-from DataGenerator.FakeData import genre_names
+from DataGenerator.FakeData import genre_names, countries
 from DataGenerator.GoodReadsUser import generate_goodreads_users
 from DataGenerator.BookStatus import generate_book_status
 
@@ -51,25 +52,29 @@ def generate_sql_insertions():
     for genre in book_genres:
         genre_table.add_values([genre.name, genre.guid])
 
+    book_countries = generate_countries(countries)
+    for country in book_countries:
+        country_table.add_values([country.name, country.guid])
+
     for index, row in random_sample.iterrows():
         language_guid = generate_guid()
         publisher_guid = generate_guid()
-        country_guid = generate_guid()
+        #country_guid = generate_guid()
         author_guid = generate_guid()
         hasgender_guid = generate_guid()
         writtenby_guid = generate_guid()
 
         language_table.add_values([row['language_code'], language_guid])
-        country_table.add_values([row['language_code'], country_guid])
+        #country_table.add_values([row['language_code'], country_guid])
         publisher_table.add_values([row['publisher'], publisher_guid])
         author_table.add_values([row['authors'], author_guid])
 
         random_gender = random.choice(book_genres)
+        random_country = random.choice(book_countries)
         imperial_date = row['publication_date'].split('/')
         american_date = f'{imperial_date[1]}/{imperial_date[0]}/{imperial_date[2]}'
-        book_table.add_values([row['isbn13'], row['title'], row['  num_pages'], row['ratings_count'],
-                               row['text_reviews_count'], american_date, country_guid, publisher_guid,
-                               language_guid])
+        book_table.add_values([row['isbn13'], row['title'], row['  num_pages'], 0, 0, american_date,
+                               random_country.guid, publisher_guid, language_guid])
         hasgender_table.add_values([hasgender_guid, row['isbn13'], random_gender.guid])
         writtenby_table.add_values([writtenby_guid, row['isbn13'], author_guid])
 

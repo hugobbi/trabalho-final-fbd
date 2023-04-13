@@ -107,3 +107,10 @@ genre_names = [
         "Short Stories/Anthology",
         "Classic Literature"
     ]
+
+countries = [
+    'China', 'India', 'United States', 'Indonesia', 'Pakistan', 'Brazil', 'Nigeria', 'Bangladesh',
+    'Russia', 'Mexico', 'Japan', 'Ethiopia', 'Philippines', 'Egypt', 'Vietnam', 'DR Congo',
+    'Turkey', 'Iran', 'Germany', 'Thailand', 'United Kingdom', 'France', 'Italy', 'Tanzania',
+    'South Africa', 'Myanmar (formerly Burma)', 'Kenya', 'South Korea', 'Colombia', 'Uganda'
+]
