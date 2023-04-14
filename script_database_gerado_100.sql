@@ -7971,7 +7971,7 @@ WHERE avg_rating = (SELECT MAX(avg_rating) FROM book_avg_rating);
 SELECT username
 FROM goodreadsuser NATURAL JOIN rating NATURAL JOIN review
 GROUP BY username
-HAVING COUNT(rtgcode) + COUNT(rvwcode) > 5;
+HAVING COUNT(rtgcode) + COUNT(rvwcode) > 1;
 
 -- Consulta 4: Nomes autores com mais livros publicados
 SELECT authorlabel
@@ -7986,10 +7986,10 @@ HAVING COUNT(DISTINCT isbn13) = (SELECT MAX(numero_de_livros) AS max_livros_por_
 -- a quantidade de pessoas seguidas por ela e que elas seguem
 SELECT username, seguindo+seguidores AS soma_conexões
 FROM goodreadsuser NATURAL JOIN user_follows as ext_user
-WHERE username <> 'Mariana Silva' AND NOT EXISTS (SELECT isbn13
+WHERE username <> 'eveevans6' AND NOT EXISTS (SELECT isbn13
                                                  FROM bookshelfbook
                                                  WHERE usercode = (SELECT DISTINCT usercode FROM goodreadsuser
-                                                                  WHERE username = 'Mariana Silva')
+                                                                  WHERE username = 'eveevans6')
      															  AND isbn13 NOT IN (SELECT DISTINCT isbn13
                                                                                     FROM bookshelfbook
                                                                                     WHERE usercode = ext_user.usercode));
@@ -8026,17 +8026,17 @@ HAVING COUNT(DISTINCT isbn13) = (SELECT MAX(numero_de_livros_lidos)
 -- Consulta 9: Dado o código do usuário, devolve seu gênero literário favorito
 SELECT gendlabel
 FROM bookshelfbook NATURAL JOIN hasgender NATURAL JOIN gender
-WHERE usercode = '1992904f-6a40-4fcc-9e18-3c85e2598654'
+WHERE usercode = '20e4eff1-0147-4696-8475-915199fac0d5'
 GROUP BY gendlabel
 HAVING COUNT(gendlabel) = (SELECT MAX(numero_generos)
                                 FROM (SELECT COUNT(gendlabel) AS numero_generos
                                      FROM bookshelfbook NATURAL JOIN hasgender NATURAL JOIN gender
-                                     WHERE usercode = '1992904f-6a40-4fcc-9e18-3c85e2598654'
+                                     WHERE usercode = '20e4eff1-0147-4696-8475-915199fac0d5'
                                      GROUP BY gendlabel) AS generos_do_user);
 
--- Consulta 10: Nome dos autores que possuem pelo menos dois livros com rating médio acima de 4
+-- Consulta 10: Nome dos autores que possuem pelo menos um livro com rating médio acima de 4
 SELECT authorlabel
 FROM book_avg_rating NATURAL JOIN book_author
 WHERE avg_rating >= 4
 GROUP BY authorlabel
-HAVING COUNT(DISTINCT isbn13) > 1;
+HAVING COUNT(DISTINCT isbn13) >= 1;
