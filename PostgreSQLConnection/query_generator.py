@@ -13,6 +13,14 @@ def run_sql_query_with_pandas(engine, query):
     dataframe = pd.read_sql(query, engine)
     return dataframe
 
+def show_result_message(dataframe):
+    print("###############################################################")
+    if dataframe.empty:
+        print("Nenhum resultado encontrado.")
+    else:
+        print(dataframe)
+    print("###############################################################")
+
 def get_books_with_autor_name(engine):
     author_name = input("Digite o nome do autor: ")
     author_books_query = f"\t\tSELECT Book.title, Book.pagecount \n" \
@@ -27,58 +35,19 @@ def get_books_with_autor_name(engine):
 
     result = pd.read_sql(author_books_actual_query, con=engine, params=('%' + author_name + '%',))
     show_result_message(result)
-
-
-
-def select_rating_type(engine):
-    comparison_value = show_comparison_menu()
-    rating_value = get_rating_value()
-
-    book_rating_query = f"\t\tSELECT Book.title, AVG(numberofstars) as averagerating \n" \
-                         "\t\tFROM Book NATURAL JOIN rating \n" \
-                         "\t\tGROUP BY Book.isbn13 \n" \
-                         "\t\tHAVING AVG(numberofstars) " + f"{comparison_value} {rating_value}" + ";"
-
-    print(f'\nQuery:\n{book_rating_query}\n')
-    book_rating_query.replace("\t", "")
-    book_rating_query.replace("\n", "")
-
-    result = run_sql_query_with_pandas(engine, book_rating_query)
-    show_result_message(result)
-
-
-def get_rating_value():
-    rating_value = input("Digite a nota desejada: ")
-    try:
-        rating_value = float(rating_value)
-    except ValueError:
-        print("O valor digitado não é um número.")
-        get_rating_value()
-
-    return rating_value
-
-
-
-
-def show_result_message(dataframe):
-    print("###############################################################")
-    if dataframe.empty:
-        print("Nenhum resultado encontrado.")
-    else:
-        print(dataframe)
-    print("###############################################################")
-
-
-def get_brazilian_bad_rated_books(engine):
-    brazil_bad_rated_books = f"\t\tSELECT title, avg_rating, authorlabel \n" \
+def get_country_good_rated_books(engine):
+    country_name = input("Digite o nome do país em inglês: ")
+    country_good_rated_books = f"\t\tSELECT title, avg_rating, authorlabel \n" \
                                 "\t\tFROM book_avg_rating NATURAL JOIN book_author NATURAL JOIN country \n" \
-                                "\t\tWHERE avg_rating <= 3 AND ctrylabel = 'Brazil';"
+                                "\t\tWHERE avg_rating <= 3 AND ctrylabel = '" + f"{country_name}" + "';"
 
-    print(f'\nQuery:\n{brazil_bad_rated_books}\n')
-    brazil_bad_rated_books.replace("\t", "")
-    brazil_bad_rated_books.replace("\n", "")
+    print(f'\nQuery:\n{country_good_rated_books}\n')
 
-    result = run_sql_query_with_pandas(engine, brazil_bad_rated_books)
+    country_good_rated_books_actual_query = f"SELECT title, avg_rating, authorlabel " \
+                                "FROM book_avg_rating NATURAL JOIN book_author NATURAL JOIN country " \
+                                "WHERE avg_rating <= 3 AND ctrylabel = %s;"
+
+    result = pd.read_sql(country_good_rated_books_actual_query, con=engine, params=(country_name,))
     show_result_message(result)
 
 def get_best_rated_books(engine):
@@ -207,16 +176,29 @@ def get_favorite_genre_by_usercode(engine):
     result = run_sql_query_with_pandas(engine, users_favorite_genre)
     show_result_message(result)
 
-def get_authors_with_rating_bigger_than_four(engine):
-    authors_with_rating_bigger_than_four = f"\t\tSELECT authorlabel \n" \
-                                            "\t\tFROM book_avg_rating NATURAL JOIN book_author \n" \
-                                            "\t\tWHERE avg_rating >= 4 \n" \
-                                            "\t\tGROUP BY authorlabel \n" \
-                                            "\t\tHAVING COUNT(DISTINCT isbn13) > 1;"
+def get_authors_with_inputed_rating(engine):
+    comparison_value = show_comparison_menu()
+    rating_value = get_rating_value()
 
-    print(f'\nQuery:\n{authors_with_rating_bigger_than_four}\n')
-    authors_with_rating_bigger_than_four.replace("\t", "")
-    authors_with_rating_bigger_than_four.replace("\n", "")
+    authors_with_inputed_rating = f"\t\tSELECT authorlabel \n" \
+                                    "\t\tFROM book_avg_rating NATURAL JOIN book_author \n" \
+                                    "\t\tWHERE avg_rating " + f"{comparison_value} {rating_value}" + " \n" \
+                                    "\t\tGROUP BY authorlabel \n" \
+                                    "\t\tHAVING COUNT(DISTINCT isbn13) >= 1;"
 
-    result = run_sql_query_with_pandas(engine, authors_with_rating_bigger_than_four)
+    print(f'\nQuery:\n{authors_with_inputed_rating}\n')
+    authors_with_inputed_rating.replace("\t", "")
+    authors_with_inputed_rating.replace("\n", "")
+
+    result = run_sql_query_with_pandas(engine, authors_with_inputed_rating)
     show_result_message(result)
+
+def get_rating_value():
+    rating_value = input("Digite a nota desejada: ")
+    try:
+        rating_value = float(rating_value)
+    except ValueError:
+        print("O valor digitado não é um número.")
+        get_rating_value()
+
+    return rating_value
