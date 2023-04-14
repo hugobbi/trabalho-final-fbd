@@ -8,13 +8,14 @@ menu_options = [
     "2 -> Nome e autor dos livros com maior rating",
     "3 -> Usernames dos usuários com mais de 1 rating e review combinados",
     "4 -> Nomes autores com mais livros publicados",
-    "5 -> Nome dos usuários que têm salvo pelo menos os mesmos livros que [NOME] e a soma entre"
+    "5 -> Nome dos usuários que têm salvo pelo menos os mesmos livros que eveevans6 e a soma entre"
     "a quantidade de pessoas seguidas por ela e que elas seguem",
     "6 -> Nomes dos gêneros literários com mais livros registrados",
     "7 -> Nomes dos usuários que escreveram mais reviews e o número de seguidores",
     "8 -> Nomes dos usuários que leram mais livros e o número de pessoas que eles seguem",
     "9 -> Dado o nome do usuário, devolve seu gênero literário favorito",
     "10 -> Nome dos autores que possuem pelo menos um livros com rating médio acima, abaixo ou igual a um valor inputado",
+    "11 -> Rodar query que dispara o gatilho",
     "sair -> Sair do programa",
     "---------------------------------------------------------------\n",
     ]
@@ -66,6 +67,9 @@ def run_menu_option(input, engine):
             show_return_message()
         case "10":
             get_authors_with_inputed_rating(engine)
+            show_return_message()
+        case "11":
+            run_trigger(engine)
             show_return_message()
         case "sair":
             print("Saindo do programa...")

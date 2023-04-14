@@ -200,3 +200,14 @@ def get_rating_value():
         get_rating_value()
 
     return rating_value
+
+def run_trigger(engine):
+    trigger = f"\t\tINSERT INTO Rating (RtgCode, NumberOfStars, UserCode, ISBN13) values \n" \
+                "\t\t('936308d9-7e76-44bd-8f12-fbe0f58404bb', 4, '62277fd0-680b-437e-a6b4-8a76133dbcd0', 9780375837890);"
+
+    print(f'\nQuery:\n{trigger}\n')
+    trigger.replace("\t", "")
+    trigger.replace("\n", "")
+
+    result = run_sql_query_with_pandas(engine, trigger)
+    show_result_message(result)
