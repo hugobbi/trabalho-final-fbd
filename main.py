@@ -4,9 +4,9 @@ from PostgreSQLConnection.connection_manager import *
 from PostgreSQLConnection.query_generator import *
 from PostgreSQLConnection.menu import *
 
-database="trabalho_fbd_etapa2"
+database="postgres"
 user="postgres"
-password="macaulicauquin123"
+password="postgres"
 host="localhost"
 port='5432'
 
