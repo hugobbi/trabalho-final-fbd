@@ -4,7 +4,7 @@ menu_options = [
     "---------------------------------------------------------------",
     "Digite o comando à esquerda para rodar a ação correspondente:",
     "---------------------------------------------------------------",
-    "1 -> Nome, média e autor dos livros com média <= 3 estrelas publicados no Brasil",
+    "1 -> Nome, média e autor dos livros com média <= 3 estrelas publicados em um país (input)",
     "2 -> Nome e autor dos livros com maior rating",
     "3 -> Usernames dos usuários com mais de 1 rating e review combinados SELECT username",
     "4 -> Nomes autores com mais livros publicados",
@@ -14,9 +14,7 @@ menu_options = [
     "7 -> Nomes dos usuários que escreveram mais reviews e o número de seguidores",
     "8 -> Nomes dos usuários que leram mais livros e o número de pessoas que eles seguem",
     "9 -> Dado o código do usuário, devolve seu gênero literário favorito",
-    "10 -> Nome dos autores que possuem pelo menos dois livros com rating médio acima de 4",
-    "x11 -> Procurar livros de um autor com uso do prompt de comando",
-    "x12 -> Procurar livros de acordo com a sua avaliação com o uso do prompt de comando",
+    "10 -> Nome dos autores que possuem pelo menos um livros com rating médio acima, abaixo ou igual a um valor inputado",
     "sair -> Sair do programa",
     "---------------------------------------------------------------\n",
     ]
@@ -40,7 +38,7 @@ def prompt_input():
 def run_menu_option(input, engine):
     match input:
         case "1":
-            get_brazilian_bad_rated_books(engine)
+            get_country_good_rated_books(engine)
             show_return_message()
         case "2":
             get_best_rated_books(engine)
@@ -67,13 +65,7 @@ def run_menu_option(input, engine):
             get_favorite_genre_by_usercode(engine)
             show_return_message()
         case "10":
-            get_authors_with_rating_bigger_than_four(engine)
-            show_return_message()
-        case "9":
-            select_rating_type(engine)
-            show_return_message()
-        case "10":
-            get_books_with_autor_name(engine)
+            get_authors_with_inputed_rating(engine)
             show_return_message()
         case "sair":
             print("Saindo do programa...")
