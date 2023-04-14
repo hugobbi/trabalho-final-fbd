@@ -21,20 +21,6 @@ def show_result_message(dataframe):
         print(dataframe)
     print("###############################################################")
 
-def get_books_with_autor_name(engine):
-    author_name = input("Digite o nome do autor: ")
-    author_books_query = f"\t\tSELECT Book.title, Book.pagecount \n" \
-                          "\t\tFROM Author NATURAL JOIN WrittenBy NATURAL JOIN Book \n" \
-                          "\t\tWHERE Author.authorlabel = '%" + f"{author_name}" + "%';"
-
-    print(f'\nQuery:\n{author_books_query}\n')
-
-    author_books_actual_query = f"SELECT Book.title, Book.pagecount " \
-                                 "FROM Author NATURAL JOIN WrittenBy NATURAL JOIN Book " \
-                                 "WHERE Author.authorlabel LIKE %s;"
-
-    result = pd.read_sql(author_books_actual_query, con=engine, params=('%' + author_name + '%',))
-    show_result_message(result)
 def get_country_good_rated_books(engine):
     country_name = input("Digite o nome do país em inglês: ")
     country_good_rated_books = f"\t\tSELECT title, avg_rating, authorlabel \n" \
@@ -94,10 +80,10 @@ def get_authors_that_published_most_books(engine):
 def get_users_with_at_least_the_same_books_as(engine):
     users_with_at_least_the_same_books_as = f"\t\tSELECT username, seguindo+seguidores AS soma_conexões \n" \
                                           "\t\tFROM goodreadsuser NATURAL JOIN user_follows as ext_user \n" \
-                                          "\t\tWHERE username <> 'Mariana Silva' AND NOT EXISTS (SELECT isbn13 \n" \
+                                          "\t\tWHERE username <> 'eveevans6' AND NOT EXISTS (SELECT isbn13 \n" \
                                                                             "\t\t\t\t\t\t\t\t\t\tFROM bookshelfbook \n" \
                                                                             "\t\t\t\t\t\t\t\t\t\t\t\tWHERE usercode = (SELECT DISTINCT usercode FROM goodreadsuser \n" \
-                                                                            "\t\t\t\t\t\t\t\t\t\t\t\tWHERE username = 'Mariana Silva') \n" \
+                                                                            "\t\t\t\t\t\t\t\t\t\t\t\tWHERE username = 'eveevans6') \n" \
                                                                             "\t\t\t\t\t\t\t\t\t\t\t\tAND isbn13 NOT IN (SELECT DISTINCT isbn13 \n" \
                                                                             "\t\t\t\t\t\t\t\t\t\t\t\tFROM bookshelfbook \n" \
                                                                             "\t\t\t\t\t\t\t\t\t\t\t\tWHERE usercode = ext_user.usercode));"
@@ -160,20 +146,32 @@ def get_users_that_read_most_books(engine):
     show_result_message(result)
 
 def get_favorite_genre_by_usercode(engine):
+    user_code = input("Digite o código do usuário desejada: ")
+
     users_favorite_genre = f"\t\tSELECT gendlabel \n" \
                             "\t\tFROM bookshelfbook NATURAL JOIN hasgender NATURAL JOIN gender \n" \
-                            "\t\tWHERE usercode = '1992904f-6a40-4fcc-9e18-3c85e2598654' \n" \
+                            "\t\tWHERE usercode = '" + f"{user_code}" + "' \n" \
                             "\t\tGROUP BY gendlabel \n" \
                             "\t\tHAVING COUNT(gendlabel) = (SELECT MAX(numero_generos) \n" \
                                             "\t\t\t\t\t\t\t\t\t\tFROM (SELECT COUNT(gendlabel) AS numero_generos \n" \
-                                            "\t\t\t\t\t\t\t\t\t\t\t\tWHERE usercode = '1992904f-6a40-4fcc-9e18-3c85e2598654' \n" \
+                                            "\t\t\t\t\t\t\t\t\t\t\t\tFROM bookshelfbook NATURAL JOIN hasgender NATURAL JOIN gender \n" \
+                                            "\t\t\t\t\t\t\t\t\t\t\t\tWHERE usercode = '" + f"{user_code}" + "' \n" \
                                             "\t\t\t\t\t\t\t\t\t\t\t\tGROUP BY gendlabel) AS generos_do_user);"
 
     print(f'\nQuery:\n{users_favorite_genre}\n')
-    users_favorite_genre.replace("\t", "")
-    users_favorite_genre.replace("\n", "")
 
-    result = run_sql_query_with_pandas(engine, users_favorite_genre)
+    users_favorite_genre_actual_query = f"SELECT gendlabel " \
+                                           "FROM bookshelfbook NATURAL JOIN hasgender NATURAL JOIN gender " \
+                                           "WHERE usercode = %s " \
+                                           "GROUP BY gendlabel " \
+                                           "HAVING COUNT(gendlabel) = (SELECT MAX(numero_generos) " \
+                                                                       "FROM (SELECT COUNT(gendlabel) AS numero_generos " \
+                                                                        "FROM bookshelfbook NATURAL JOIN hasgender NATURAL JOIN gender " \
+                                                                        "WHERE usercode = %s " \
+                                                                        "GROUP BY gendlabel) AS generos_do_user);"
+
+
+    result = pd.read_sql(users_favorite_genre_actual_query, con=engine, params=(user_code,user_code))
     show_result_message(result)
 
 def get_authors_with_inputed_rating(engine):

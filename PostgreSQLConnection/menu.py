@@ -6,7 +6,7 @@ menu_options = [
     "---------------------------------------------------------------",
     "1 -> Nome, média e autor dos livros com média <= 3 estrelas publicados em um país (input)",
     "2 -> Nome e autor dos livros com maior rating",
-    "3 -> Usernames dos usuários com mais de 1 rating e review combinados SELECT username",
+    "3 -> Usernames dos usuários com mais de 1 rating e review combinados",
     "4 -> Nomes autores com mais livros publicados",
     "5 -> Nome dos usuários que têm salvo pelo menos os mesmos livros que Mariana Silva e a soma entre"
     "a quantidade de pessoas seguidas por ela e que elas seguem",
